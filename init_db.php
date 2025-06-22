@@ -1,0 +1,1 @@
+<?php /* SQLite Init Script */ ?>

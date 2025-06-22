@@ -1,0 +1,1 @@
+<?php /* returns JSON for Chart.js */ ?>

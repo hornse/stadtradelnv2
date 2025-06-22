@@ -1,32 +1,32 @@
 <?php
 session_start();
+require_once __DIR__ . '/auth/auth_webuntis.php';
+
+use Stadtradeln\Auth\AuthWebUntis;
+
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['user'] ?? '';
     $pass = $_POST['pass'] ?? '';
 
     if ($user && $pass) {
-        // Authentifizierung über WebUntis-Skript ehemals auth_webuntis.php
-        require_once 'webuntis_config.php';
         $auth = new AuthWebUntis();
         if ($auth->validateUser($user, $pass)) {
             $_SESSION['user'] = $user;
 
-            // Datenbankverbindung aufbauen
-            $db = new SQLite3('db.sqlite');
-            $stmt = $db->prepare('SELECT klasse FROM users WHERE username = :user');
-            $stmt->bindValue(':user', $user, SQLITE3_TEXT);
-            $result = $stmt->execute();
-            $row = $result->fetchArray(SQLITE3_ASSOC);
-            if ($row && $row['klasse']) {
-                $_SESSION['klasse'] = $row['klasse'];
-                header('Location: index.php');
-            } else {
+            // Klassenzuordnung prüfen
+            if (!isset($_SESSION['klasse'])) {
                 header('Location: choose_class.php');
+                exit;
             }
+
+            header('Location: index.php');
             exit;
         } else {
-            $error = "Login fehlgeschlagen";
+            $error = "Login fehlgeschlagen. Bitte überprüfe Benutzername und Passwort.";
         }
+    } else {
+        $error = "Bitte Benutzername und Passwort eingeben.";
     }
 }
 ?>
@@ -35,29 +35,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>Login – Stadtradeln</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>🔐 Login WebUntis</h1>
-</header>
-
-<main>
-  <h2>Login</h2>
-  <?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
-  <form method="POST">
-    <label for="user">Benutzername:</label>
-    <input type="text" name="user" id="user" required><br>
-    <label for="pass">Passwort:</label>
-    <input type="password" name="pass" id="pass" required><br>
-    <button type="submit">Einloggen</button>
-  </form>
-</main>
-
-<footer>
-  &copy; 2025 – Friedrich-Rückert-Gymnasium Düsseldorf
-</footer>
+  <header><h1>🔐 Login WebUntis</h1></header>
+  <main>
+    <h2>Login mit WebUntis-Zugang</h2>
+    <?php if ($error): ?>
+      <p class="error"><?= htmlspecialchars($error) ?></p>
+    <?php endif; ?>
+    <form method="post">
+      <label>Benutzername:
+        <input type="text" name="user" required>
+      </label><br>
+      <label>Passwort:
+        <input type="password" name="pass" required>
+      </label><br>
+      <button type="submit">Einloggen</button>
+    </form>
+  </main>
+  <footer>&copy; 2025 – Friedrich-Rückert-Gymnasium Düsseldorf</footer>
 </body>
 </html>
-

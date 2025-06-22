@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Stadtradeln – Klassenranking</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="container">

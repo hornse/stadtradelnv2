@@ -5,8 +5,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass = $_POST['pass'] ?? '';
 
     if ($user && $pass) {
-        // Authentifizierung über WebUntis-Skript
-        require_once 'auth_webuntis.php';
+        // Authentifizierung über WebUntis-Skript ehemals auth_webuntis.php
+        require_once 'webuntis_config.php';
         $auth = new AuthWebUntis();
         if ($auth->validateUser($user, $pass)) {
             $_SESSION['user'] = $user;

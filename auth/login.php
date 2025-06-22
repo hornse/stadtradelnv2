@@ -1,39 +1,56 @@
 <?php
 session_start();
+require_once 'auth_webuntis.php';
+require_once '../farben.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['user'] ?? '';
     $pass = $_POST['pass'] ?? '';
+
     if ($user && $pass) {
-        // Beispiel: Klassenname aus dem Benutzernamen ableiten
-        if (preg_match('/^(\d+[a-zA-Z]*)_/', $user, $m)) {
-            $_SESSION['klasse'] = $m[1];
+        $auth = new \MRBS\Auth\AuthWebUntis();
+
+        if ($auth->validateUser($user, $pass)) {
+            $_SESSION['user'] = $user;
+
+            // Klasse aus Benutzername extrahieren: z.B. 9A_schmidt
+            if (preg_match('/^([5-9]|10|EF|Q1|Q2)[a-zA-Z]/i', $user, $match)) {
+                $_SESSION['klasse'] = strtoupper($match[0]);
+            } else {
+                $_SESSION['klasse'] = 'unbekannt';
+            }
+
+            header('Location: ../index.php');
+            exit;
         } else {
-            $_SESSION['klasse'] = 'unbekannt';
+            $fehler = "Login fehlgeschlagen.";
         }
-        $_SESSION['user'] = $user;
-        header('Location: ../index.php');
-        exit;
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="stylesheet" href="../style.css"><meta charset="UTF-8"><title>Login</title></head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
 <body>
-<header>
-  <h1>🔐 Login WebUntis</h1>
-</header>
-<main>
-  <h1>Login</h1>
-  <form method="POST">
-    Benutzername: <input type="text" name="user"><br>
-    Passwort: <input type="password" name="pass"><br>
-    <button type="submit">Einloggen</button>
-  </form>
-</main>
-<footer>
-  &copy; 2025 – Friedrich-Rückert-Gymnasium Düsseldorf
-</footer>
+  <header>
+    <h1>🔐 Login WebUntis</h1>
+  </header>
+  <main>
+    <h2>Login</h2>
+    <?php if (!empty($fehler)) echo "<p style='color:red;'>$fehler</p>"; ?>
+    <form method="POST">
+      Benutzername: <input type="text" name="user" required><br>
+      Passwort: <input type="password" name="pass" required><br>
+      <button type="submit">Einloggen</button>
+    </form>
+  </main>
+  <footer>
+    &copy; 2025 – Friedrich-Rückert-Gymnasium Düsseldorf
+  </footer>
 </body>
 </html>

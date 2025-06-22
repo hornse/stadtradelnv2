@@ -1,1 +1,0 @@
-<?php return ['client' => 'mrbs', 'school' => 'frg-duesseldorf', 'base_url' => 'https://ajax.webuntis.com'];

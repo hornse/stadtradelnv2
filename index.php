@@ -1,51 +1,68 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user']) || !isset($_SESSION['klasse'])) {
-    header("Location: auth/login.php");
+    header('Location: landing.html');
     exit;
 }
+
+$db = new PDO('sqlite:../db.sqlite');
+$klasse = $_SESSION['klasse'];
+
+$stmt = $db->prepare('SELECT SUM(km) as total FROM eintraege WHERE klasse = ?');
+$stmt->execute([$klasse]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+$gesamtKm = $result['total'] ?? 0;
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8">
-  <title>Stadtradeln – Kilometer eintragen</title>
+  <title>Stadtradeln – Eingabe</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Willkommen, <?php echo htmlspecialchars($_SESSION['user']); ?>!</h1>
-  <p>Du trägst Kilometer für die Klasse <strong><?php echo htmlspecialchars($_SESSION['klasse']); ?></strong> ein.</p>
-  <form action="submit.php" method="POST">
-    <label>Gefahrene Kilometer:
-      <input type="number" name="kilometer" min="1" max="100" required>
-    </label><br>
-    <button type="submit">Absenden</button>
-  </form>
+  <div class="container">
+    <h1>Stadtradeln <?= htmlspecialchars($klasse) ?></h1>
 
-  <h2>Ranking</h2>
-  <canvas id="chart" width="400" height="200"></canvas>
+    <form action="submit.php" method="POST">
+      <label for="km">Gefahrene Kilometer eintragen:</label>
+      <input type="number" name="km" id="km" step="0.1" min="0" required>
+      <button type="submit">Absenden</button>
+    </form>
+
+    <p>Insgesamt gefahren: <strong><?= $gesamtKm ?> km</strong></p>
+
+    <h2>Klassenvergleich</h2>
+    <canvas id="chart" width="400" height="200"></canvas>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     fetch('data.php')
       .then(res => res.json())
       .then(data => {
-        const ctx = document.getElementById('chart').getContext('2d');
-        new Chart(ctx, {
+        const ctx = document.getElementById('chart');
+        const chart = new Chart(ctx, {
           type: 'bar',
           data: {
             labels: data.map(e => e.klasse),
             datasets: [{
-              label: 'Gesamtkilometer',
-              data: data.map(e => e.kilometer),
-              backgroundColor: data.map((_, i) => `hsl(${i * 50 % 360}, 60%, 60%)`)
+              label: 'Gefahrene Kilometer',
+              data: data.map(e => e.km),
+              backgroundColor: data.map(e => e.farbe)
             }]
           },
           options: {
-            scales: { y: { beginAtZero: true } }
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
           }
         });
       });
   </script>
-  <p><a href="auth/logout.php">Logout</a></p>
 </body>
 </html>

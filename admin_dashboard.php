@@ -1,1 +1,0 @@
-<?php /* Admin Chart.js Dashboard */ ?>

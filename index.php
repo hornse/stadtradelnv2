@@ -1,1 +1,0 @@
-<?php /* index with session-check */ ?>

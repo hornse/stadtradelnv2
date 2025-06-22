@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'auth_webuntis.php';
+require_once 'webuntis_config.php';
 require_once '../farben.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

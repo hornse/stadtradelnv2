@@ -20,7 +20,7 @@ $gesamtKm = $result['total'] ?? 0;
 <head>
   <meta charset="UTF-8">
   <title>Stadtradeln – Eingabe</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="container">
